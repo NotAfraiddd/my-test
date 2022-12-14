@@ -1,58 +1,27 @@
 import React, { useReducer, useRef, useState } from "react";
 
 function App() {
-  const [job, setJob] = useState('')
-  const [jobs, setJobs] = useState(() => {
-    const storageJobs = JSON.parse(localStorage.getItem('jobs'))
-    return storageJobs ?? [];
-  }); //storageJobs phải là null or undefined thì mới lấy phía sau
+  const [count, setCount] = useState(60)
 
-  const inputRef = useRef();
+  const timeCurrent = useRef(1);
 
-  const handleDelete = (indexValue) => {
-    const jobIndexValue = jobs.filter((job, index) => index !== indexValue)
-    // filter ra các phần tử được chứa trong mảng mà có vị trí khác so với vị trí được chọn
-
-    localStorage.setItem('jobs', JSON.stringify(jobIndexValue));
-    // lưu những giá trị phần tử ở trên vào localStorage
-
-    setJobs(jobIndexValue);
-    // setJobs lại
+  console.log(timeCurrent);
+  const handleStart = () => {
+    timeCurrent.current = setInterval(() => {
+      setCount(preCount => preCount - 1)
+    }, 1000)
+    console.log();
   }
-
-  const handleSubmit = () => {
-    setJobs(older => {
-      const newJobs = [...older, job]
-
-      const jsonJobs = JSON.stringify(newJobs)// luwu vaof localstorage
-
-      localStorage.setItem('jobs', jsonJobs)
-
-      return newJobs
-    })
-    setJob('')
-    inputRef.current.focus()
+  const handleStop = () => {
+    clearInterval(timeCurrent.current)
   }
 
   return (
     <div className="App" style={{ padding: "0 20px" }}>
-      <h3>Todo App</h3>
-      <input
-        ref={inputRef}
-        value={job}
-        placeholder="Enter todo...."
-        onChange={e => setJob(e.target.value)}
-      />
+      <h1>{count}</h1>
+      <button onClick={handleStart}>Start</button>
+      <button onClick={handleStop}>Stop</button>
 
-      <button onClick={handleSubmit}>Add</button>
-      <ul>
-        {console.log(jobs)}
-        {
-          jobs.map((item, index) => (
-            <li key={index}> {item} <span onClick={() => handleDelete(index)}>&times;</span></li>
-          ))
-        }
-      </ul>
     </div>
   );
 }
