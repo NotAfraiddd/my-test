@@ -1,88 +1,39 @@
-/* eslint-disable no-fallthrough */
-/* eslint-disable default-case */
-import React, { useReducer, useRef } from "react";
-//use Reducer
-//1. Initialized state
-const initState = {
-  job: "",
-  jobs: [],
-};
-//2.Actions
-const SET_JOB = "set_job";
-const ADD_JOB = "add_job";
-const DELETE_JOB = "delete_job";
+import React, { useReducer, useRef, useState } from "react";
 
-const setJob = payload => {
-  return {
-    type: SET_JOB,
-    payload
-  }
-}
-
-const addJob = payload => {
-  return {
-    type: ADD_JOB,
-    payload
-  }
-}
-
-const deleteJob = payload => {
-  return {
-    type: DELETE_JOB,
-    payload
-  }
-}
-
-//3.Reducer
-const reducer = (state, action) => {
-  console.log('Action:', action);
-  console.log('Previous state:', state);
-
-  let newState
-  switch (action.type) {
-    case SET_JOB:
-      newState = {
-        ...state,
-        //...state là bảo lưu state cũ
-        job: action.payload
-      }
-      break;
-    case ADD_JOB:
-      newState = {
-        ...state,
-        jobs: [...state.jobs, action.payload]
-      }
-      break;
-    case DELETE_JOB:
-      const newJobs = [...state.jobs] // lấy mảng cũ
-      newJobs.splice(action.payload, 1)
-      newState = {
-        ...state,
-        jobs: newJobs
-      }
-      break;
-    default:
-      throw new Error('Invalid action.')
-  }
-
-  console.log('new state', newState);
-
-  return newState;
-}
-
-//4.Dispatcher
 function App() {
-  const [state, dispatch] = useReducer(reducer, initState);
-  const { job, jobs } = state;
+  const [job, setJob] = useState('')
+  const [jobs, setJobs] = useState(() => {
+    const storageJobs = JSON.parse(localStorage.getItem('jobs'))
+    return storageJobs ?? [];
+  }); //storageJobs phải là null or undefined thì mới lấy phía sau
+
   const inputRef = useRef();
 
+  const handleDelete = (indexValue) => {
+    const jobIndexValue = jobs.filter((job, index) => index !== indexValue)
+    // filter ra các phần tử được chứa trong mảng mà có vị trí khác so với vị trí được chọn
+
+    localStorage.setItem('jobs', JSON.stringify(jobIndexValue));
+    // lưu những giá trị phần tử ở trên vào localStorage
+
+    setJobs(jobIndexValue);
+    // setJobs lại
+  }
 
   const handleSubmit = () => {
-    dispatch(addJob(job))
-    dispatch(setJob(''))
-    inputRef.current.focus()
+    setJobs(older => {
+      const newJobs = [...older, job]
 
+      const jsonJobs = JSON.stringify(newJobs)// luwu vaof localstorage
+
+      localStorage.setItem('jobs', jsonJobs)
+
+      return newJobs
+    })
+    setJob('')
+    inputRef.current.focus()
   }
+
   return (
     <div className="App" style={{ padding: "0 20px" }}>
       <h3>Todo App</h3>
@@ -90,15 +41,15 @@ function App() {
         ref={inputRef}
         value={job}
         placeholder="Enter todo...."
-        onChange={e => {
-          dispatch(setJob(e.target.value));
-        }} />
+        onChange={e => setJob(e.target.value)}
+      />
 
       <button onClick={handleSubmit}>Add</button>
       <ul>
+        {console.log(jobs)}
         {
           jobs.map((item, index) => (
-            <li key={index}> {item} <span onClick={() => dispatch(deleteJob(index))}>&times;</span></li>
+            <li key={index}> {item} <span onClick={() => handleDelete(index)}>&times;</span></li>
           ))
         }
       </ul>
