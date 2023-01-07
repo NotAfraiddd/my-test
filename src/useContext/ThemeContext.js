@@ -3,7 +3,7 @@ import Content from "./content";
 
 export const ThemeContext = createContext();
 
-function ThemeProvider({children}) {
+function ThemeProvider({ children }) {
     const [theme, setTheme] = useState('Dark')
     const toggleTheme = () => {
         setTheme(theme === 'Dark' ? 'Light' : 'Dark')
@@ -16,7 +16,7 @@ function ThemeProvider({children}) {
 
     return (
         <ThemeContext.Provider value={value}>
-           {children}
+            {children}
         </ThemeContext.Provider>
     );
 }
